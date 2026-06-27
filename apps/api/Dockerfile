@@ -42,4 +42,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "evidence_ai.interfaces.http.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+# Migraciones + uvicorn. exec form ["sh","-c",...] evita problemas de parsing
+# en plataformas como Render que pasan el CMD sin shell wrapping.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn evidence_ai.interfaces.http.app:create_app --factory --host 0.0.0.0 --port 8000"]

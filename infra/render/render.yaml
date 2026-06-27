@@ -28,11 +28,10 @@ services:
     healthCheckPath: /health
     autoDeploy: true
 
-    # Free tier de Render no permite preDeployCommand → corremos migraciones
-    # al arrancar el contenedor. Envolvemos en sh -c para que el shell
-    # interprete el && (Render pasa dockerCommand directo al SO sin shell).
-    # Alembic es idempotente: si ya está aplicado, no hace nada.
-    dockerCommand: 'sh -c "/app/.venv/bin/alembic upgrade head && /app/.venv/bin/uvicorn evidence_ai.interfaces.http.app:create_app --factory --host 0.0.0.0 --port 8000"'
+    # CMD del Dockerfile ya corre `alembic upgrade head && uvicorn ...`.
+    # No definimos dockerCommand aquí para evitar problemas de YAML/shell parsing
+    # en Render. Alembic es idempotente — si las migraciones ya están aplicadas,
+    # no hace nada.
 
     envVars:
       - key: ENVIRONMENT
