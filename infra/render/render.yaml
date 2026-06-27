@@ -23,8 +23,10 @@ services:
     healthCheckPath: /health
     autoDeploy: true
 
-    # Migraciones Alembic antes de cada deploy
-    preDeployCommand: "/app/.venv/bin/alembic upgrade head"
+    # Free tier de Render no permite preDeployCommand → corremos migraciones
+    # al arrancar el contenedor (alembic es idempotente: si ya están aplicadas,
+    # no hace nada). El "&&" garantiza que uvicorn solo arranca si migró bien.
+    dockerCommand: "/app/.venv/bin/alembic upgrade head && /app/.venv/bin/uvicorn evidence_ai.interfaces.http.app:create_app --factory --host 0.0.0.0 --port 8000"
 
     envVars:
       - key: ENVIRONMENT
