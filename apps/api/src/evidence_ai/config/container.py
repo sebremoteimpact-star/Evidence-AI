@@ -6,20 +6,23 @@ Los tests pueden sobrescribir cualquier provider con `.override(...)`.
 
 from __future__ import annotations
 
-from arq import create_pool
-from arq.connections import RedisSettings
 from dependency_injector import containers, providers
 from redis.asyncio import Redis
 
 from evidence_ai.application.use_cases.authenticate_user import AuthenticateUserUseCase
 from evidence_ai.application.use_cases.create_verification import CreateVerificationUseCase
 from evidence_ai.application.use_cases.register_user import RegisterUserUseCase
+from evidence_ai.application.use_cases.verify_content import VerifyContentUseCase
 from evidence_ai.config.settings import Settings, get_settings
+from evidence_ai.domain.services.confidence_calculator import ConfidenceCalculator
+from evidence_ai.infrastructure.ai.claude_reasoner import ClaudeAIReasoner
 from evidence_ai.infrastructure.auth.jwt_service import JwtService
 from evidence_ai.infrastructure.auth.password_hasher import Argon2PasswordHasher
 from evidence_ai.infrastructure.cache.redis_cache import RedisCache
-from evidence_ai.infrastructure.events.arq_job_queue import ArqJobQueue
+from evidence_ai.infrastructure.events.inprocess_job_queue import InProcessJobQueue
 from evidence_ai.infrastructure.events.redis_event_publisher import RedisEventPublisher
+from evidence_ai.infrastructure.fetchers.readability_fetcher import ReadabilityFetcher
+from evidence_ai.infrastructure.fetchers.youtube_fetcher import YouTubeTranscriptFetcher
 from evidence_ai.infrastructure.persistence.database import (
     create_engine,
     create_session_factory,
@@ -31,14 +34,11 @@ from evidence_ai.infrastructure.persistence.repositories.sql_verification_reposi
     SqlVerificationRepository,
 )
 from evidence_ai.infrastructure.persistence.unit_of_work import SqlAlchemyUnitOfWork
+from evidence_ai.infrastructure.search.duckduckgo_provider import DuckDuckGoProvider
 
 
 async def _create_redis(url: str) -> Redis:
     return Redis.from_url(url, decode_responses=False)
-
-
-async def _create_arq_pool(url: str):
-    return await create_pool(RedisSettings.from_dsn(url))
 
 
 class Container(containers.DeclarativeContainer):
@@ -63,15 +63,12 @@ class Container(containers.DeclarativeContainer):
 
     # ─── Redis ───
     redis = providers.Resource(_create_redis, url=settings.provided.redis_url)
-    arq_pool = providers.Resource(_create_arq_pool, url=settings.provided.redis_url)
 
     # ─── UoW + Repositorios (Factory: una instancia por request/use case) ───
     unit_of_work = providers.Factory(
         SqlAlchemyUnitOfWork, session_factory=session_factory
     )
-    user_repository_factory = providers.Object(
-        lambda uow: SqlUserRepository(uow)
-    )
+    user_repository_factory = providers.Object(lambda uow: SqlUserRepository(uow))
     verification_repository_factory = providers.Object(
         lambda uow: SqlVerificationRepository(uow)
     )
@@ -83,9 +80,33 @@ class Container(containers.DeclarativeContainer):
     event_publisher = providers.Singleton(
         RedisEventPublisher, redis=redis, session_factory=session_factory
     )
-    job_queue = providers.Singleton(ArqJobQueue, redis=arq_pool)
 
-    # ─── Casos de uso ───
+    # ─── Componentes del pipeline ───
+    duckduckgo_provider = providers.Singleton(DuckDuckGoProvider)
+    youtube_fetcher = providers.Singleton(YouTubeTranscriptFetcher)
+    readability_fetcher = providers.Singleton(ReadabilityFetcher)
+    ai_reasoner = providers.Singleton(ClaudeAIReasoner, settings=settings)
+    confidence_calculator = providers.Singleton(ConfidenceCalculator)
+
+    # Use case del pipeline (factory para que cada job tenga su instancia)
+    verify_content_use_case = providers.Factory(
+        VerifyContentUseCase,
+        uow_factory=unit_of_work.provider,
+        fetchers=providers.List(youtube_fetcher, readability_fetcher),
+        search_providers=providers.List(duckduckgo_provider),
+        ai_reasoner=ai_reasoner,
+        event_publisher=event_publisher,
+        confidence_calculator=confidence_calculator,
+        max_sources_per_claim=settings.provided.max_sources_per_claim,
+    )
+
+    # ─── Job queue (in-process — sin worker separado) ───
+    job_queue = providers.Singleton(
+        InProcessJobQueue,
+        use_case_provider=verify_content_use_case.provider,
+    )
+
+    # ─── Casos de uso públicos ───
     register_user_use_case = providers.Factory(
         RegisterUserUseCase,
         uow=unit_of_work,

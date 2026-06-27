@@ -8,10 +8,15 @@
 #   • Supabase (Postgres con pgvector)  → https://supabase.com
 #   • Upstash (Redis)                   → https://upstash.com
 # Luego pegas sus connection strings en las env vars marcadas `sync: false`.
+#
+# NOTA sobre Render Free Tier:
+# - No soporta `preDeployCommand` → migraciones corren en dockerCommand.
+# - No soporta `type: worker` (Background Workers) → el pipeline corre
+#   in-process dentro del API usando InProcessJobQueue.
 # ─────────────────────────────────────────────
 
 services:
-  # ─── API (FastAPI) ───
+  # ─── API (FastAPI) — incluye el pipeline in-process ───
   - type: web
     name: evidence-ai-api
     runtime: docker
@@ -62,7 +67,7 @@ services:
 
       # Auth
       - key: JWT_SECRET
-        generateValue: true  # Render genera un secret aleatorio
+        generateValue: true
       - key: JWT_ALGORITHM
         value: HS256
       - key: JWT_ACCESS_TTL_MINUTES
@@ -89,49 +94,5 @@ services:
         value: "10"
       - key: MAX_INPUT_CHARS
         value: "50000"
-      - key: VERIFICATION_TIMEOUT_SECONDS
-        value: "180"
-
-  # ─── Worker (arq) ───
-  - type: worker
-    name: evidence-ai-worker
-    runtime: docker
-    plan: free
-    region: oregon
-    rootDir: apps/api
-    dockerfilePath: ./Dockerfile.worker
-    dockerContext: .
-    autoDeploy: true
-
-    envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: LOG_LEVEL
-        value: INFO
-
-      # Reutilizar las mismas connection strings que el API
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: CLAUDE_REASONING_MODEL
-        value: claude-sonnet-4-6
-      - key: CLAUDE_FAST_MODEL
-        value: claude-haiku-4-5-20251001
-      - key: SEARCH_PROVIDERS
-        value: duckduckgo
-      - key: BRAVE_SEARCH_API_KEY
-        sync: false
-      - key: GOOGLE_CSE_API_KEY
-        sync: false
-      - key: GOOGLE_CSE_ID
-        sync: false
-      - key: JWT_SECRET
-        # El worker no firma tokens pero el settings.py lo valida
-        sync: false
-      - key: MAX_SOURCES_PER_CLAIM
-        value: "10"
       - key: VERIFICATION_TIMEOUT_SECONDS
         value: "180"
