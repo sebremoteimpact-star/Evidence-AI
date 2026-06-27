@@ -26,7 +26,7 @@ from evidence_ai.infrastructure.persistence.models import (
     VerificationEventModel,
     VerificationModel,
 )
-from evidence_ai.interfaces.http.dependencies import CurrentUserId
+from evidence_ai.interfaces.http.dependencies import CurrentUserIdSse
 
 router = APIRouter(prefix="/api/v1/stream", tags=["stream"])
 
@@ -95,7 +95,7 @@ async def _subscribe_live(
 @inject
 async def stream_verification(
     verification_id: UUID,
-    user_id: CurrentUserId,
+    user_id: CurrentUserIdSse,
     redis: Annotated[Redis, Depends(Provide[Container.redis])],
     session_factory: Annotated[
         async_sessionmaker[AsyncSession], Depends(Provide[Container.session_factory])

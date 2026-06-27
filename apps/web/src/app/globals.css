@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme — fallback (la app es dark-first) */
+    --background: 30 20% 98%;
+    --foreground: 24 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 10% 95%;
+    --secondary-foreground: 24 10% 15%;
+    --muted: 30 10% 92%;
+    --muted-foreground: 24 6% 40%;
+    --accent: 30 10% 92%;
+    --accent-foreground: 24 10% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 10% 88%;
+    --input: 30 10% 88%;
+    --ring: 24 95% 53%;
+    --radius: 0.75rem;
+
+    /* Tiers — semánticos del dominio */
+    --tier-1: 142 71% 45%;  /* peer-reviewed: verde */
+    --tier-2: 217 91% 60%;  /* oficial: azul */
+    --tier-3: 239 84% 67%;  /* internacional: índigo */
+    --tier-4: 271 91% 65%;  /* fact-checker: violeta */
+    --tier-5: 292 76% 56%;  /* académico: púrpura */
+    --tier-6: 215 14% 65%;  /* periodismo: gris */
+
+    /* Postura de evidencia */
+    --stance-supports: 142 71% 45%;
+    --stance-contradicts: 0 84% 60%;
+    --stance-context: 217 91% 60%;
+    --stance-unrelated: 215 14% 65%;
+  }
+
+  .dark {
+    /* Dark theme — el default (inspirado en Claude AI) */
+    --background: 24 6% 7%;          /* casi negro cálido */
+    --foreground: 30 10% 95%;
+    --card: 24 6% 10%;
+    --card-foreground: 30 10% 95%;
+    --primary: 24 95% 53%;           /* naranja Claude */
+    --primary-foreground: 24 10% 10%;
+    --secondary: 24 6% 14%;
+    --secondary-foreground: 30 10% 95%;
+    --muted: 24 6% 14%;
+    --muted-foreground: 30 5% 65%;
+    --accent: 24 6% 18%;
+    --accent-foreground: 30 10% 95%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 30 10% 95%;
+    --border: 24 6% 18%;
+    --input: 24 6% 18%;
+    --ring: 24 95% 53%;
+
+    --tier-1: 142 65% 50%;
+    --tier-2: 217 85% 65%;
+    --tier-3: 239 75% 72%;
+    --tier-4: 271 80% 70%;
+    --tier-5: 292 65% 65%;
+    --tier-6: 215 12% 60%;
+
+    --stance-supports: 142 65% 50%;
+    --stance-contradicts: 0 70% 60%;
+    --stance-context: 217 85% 65%;
+    --stance-unrelated: 215 12% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tipografía grande, legible, jerárquica */
+  h1 {
+    @apply text-4xl md:text-5xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+  }
+  h3 {
+    @apply text-xl md:text-2xl font-medium;
+  }
+
+  /* Scrollbar más sutil */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+@layer components {
+  /* Tier badges */
+  .tier-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+           border transition-colors;
+  }
+  .tier-1 { @apply text-tier-1; background: hsl(var(--tier-1) / 0.12); border-color: hsl(var(--tier-1) / 0.3); }
+  .tier-2 { @apply text-tier-2; background: hsl(var(--tier-2) / 0.12); border-color: hsl(var(--tier-2) / 0.3); }
+  .tier-3 { @apply text-tier-3; background: hsl(var(--tier-3) / 0.12); border-color: hsl(var(--tier-3) / 0.3); }
+  .tier-4 { @apply text-tier-4; background: hsl(var(--tier-4) / 0.12); border-color: hsl(var(--tier-4) / 0.3); }
+  .tier-5 { @apply text-tier-5; background: hsl(var(--tier-5) / 0.12); border-color: hsl(var(--tier-5) / 0.3); }
+  .tier-6 { @apply text-tier-6; background: hsl(var(--tier-6) / 0.12); border-color: hsl(var(--tier-6) / 0.3); }
+
+  /* Stance badges */
+  .stance-supports     { @apply text-stance-supports;     background: hsl(var(--stance-supports) / 0.12); }
+  .stance-contradicts  { @apply text-stance-contradicts;  background: hsl(var(--stance-contradicts) / 0.12); }
+  .stance-context      { @apply text-stance-context;      background: hsl(var(--stance-context) / 0.12); }
+  .stance-unrelated    { @apply text-stance-unrelated;    background: hsl(var(--stance-unrelated) / 0.12); }
+
+  /* Glass card sutil */
+  .glass {
+    @apply bg-card/60 backdrop-blur-md border border-border/60 rounded-xl;
+  }
+
+  /* Botón primario gradient */
+  .btn-primary-gradient {
+    background: linear-gradient(135deg, hsl(24 95% 55%) 0%, hsl(15 95% 50%) 100%);
+    @apply text-white shadow-lg hover:shadow-xl transition-shadow;
+  }
+}
+
+/* Animaciones reutilizables */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
