@@ -1,4 +1,4 @@
-"""Mapeo dominio → (tier, type) leído del JSON compartido."""
+"""Mapeo dominio → (tier, type) leído del JSON bundleado con el paquete."""
 
 from __future__ import annotations
 
@@ -10,14 +10,18 @@ from urllib.parse import urlparse
 from evidence_ai.domain.value_objects.source_tier import SourceTier
 from evidence_ai.domain.value_objects.source_type import SourceType
 
-# Ruta relativa al raíz del repo
-_REGISTRY_PATH = (
-    Path(__file__).resolve().parents[5] / "packages" / "source-registry" / "registry.json"
-)
+# JSON bundleado dentro del paquete (copia de packages/source-registry/registry.json).
+# Mantener sincronizado con el del monorepo si el frontend se llega a wire.
+_REGISTRY_PATH = Path(__file__).resolve().parent / "source_registry_data.json"
 
 
 @lru_cache(maxsize=1)
 def _load_raw() -> dict:
+    if not _REGISTRY_PATH.exists():
+        raise FileNotFoundError(
+            f"source_registry_data.json no encontrado en {_REGISTRY_PATH}. "
+            "Cópialo desde packages/source-registry/registry.json."
+        )
     return json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
 
 
