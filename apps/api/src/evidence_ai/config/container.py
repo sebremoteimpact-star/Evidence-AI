@@ -49,6 +49,8 @@ class Container(containers.DeclarativeContainer):
             "evidence_ai.interfaces.http.routers.health",
             "evidence_ai.interfaces.http.routers.auth",
             "evidence_ai.interfaces.http.routers.verifications",
+            "evidence_ai.interfaces.http.routers.stream",
+            "evidence_ai.interfaces.http.dependencies",
         ]
     )
 

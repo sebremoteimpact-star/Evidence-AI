@@ -17,7 +17,7 @@ from evidence_ai.config.settings import get_settings
 from evidence_ai.infrastructure.observability.logging import configure_logging, get_logger
 from evidence_ai.interfaces.http.middleware.error_handler import register_error_handlers
 from evidence_ai.interfaces.http.middleware.request_id import RequestIdMiddleware
-from evidence_ai.interfaces.http.routers import auth, health, verifications
+from evidence_ai.interfaces.http.routers import auth, health, stream, verifications
 
 logger = get_logger(__name__)
 
@@ -82,5 +82,6 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(verifications.router)
+    app.include_router(stream.router)
 
     return app
