@@ -62,6 +62,9 @@ class Settings(BaseSettings):
 
     # ── HTTP ──
     cors_origins: str = "http://localhost:3000"
+    cors_origin_regex: str = ""
+    """Regex opcional para orígenes — útil para previews de Vercel (*.vercel.app).
+    Ejemplo: 'https://.*\\.vercel\\.app'."""
 
     # ── Rate limits ──
     rate_limit_default: str = "60/minute"

@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  output: "standalone",  // requerido para Dockerfile + ideal para Vercel
 
   // El frontend habla con el API por su URL pública
   env: {

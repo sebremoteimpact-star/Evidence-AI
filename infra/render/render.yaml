@@ -1,46 +1,135 @@
 # ─────────────────────────────────────────────
 # Render.com Blueprint para Evidence AI
 # ─────────────────────────────────────────────
-# Usar: en Render → New → Blueprint → conectar este repo.
-# Render leerá este archivo y creará los servicios.
-# Postgres se aprovisiona en Supabase (free); Redis en Upstash (free).
-# Aquí solo definimos API + Worker (free tier de Render).
+# Uso: En Render → Blueprints → New Blueprint Instance → conectar el repo.
+# Render lee este archivo y crea los servicios automáticamente.
+#
+# Servicios externos (los creas tú aparte, free tier):
+#   • Supabase (Postgres con pgvector)  → https://supabase.com
+#   • Upstash (Redis)                   → https://upstash.com
+# Luego pegas sus connection strings en las env vars marcadas `sync: false`.
 # ─────────────────────────────────────────────
 
 services:
+  # ─── API (FastAPI) ───
   - type: web
     name: evidence-ai-api
     runtime: docker
     plan: free
+    region: oregon
     rootDir: apps/api
     dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
+    autoDeploy: true
+
+    # Migraciones Alembic antes de cada deploy
+    preDeployCommand: "/app/.venv/bin/alembic upgrade head"
+
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: LOG_LEVEL
+        value: INFO
+
+      # Connection strings — pegar manualmente desde Supabase / Upstash
       - key: DATABASE_URL
-        sync: false
+        sync: false  # postgresql+asyncpg://postgres:PASS@db.SUPABASE_REF.supabase.co:5432/postgres
       - key: REDIS_URL
-        sync: false
+        sync: false  # rediss://default:PASS@xxxxx.upstash.io:6379
+
+      # Claude API
       - key: ANTHROPIC_API_KEY
         sync: false
-      - key: JWT_SECRET
-        generateValue: true
-      - key: CORS_ORIGINS
+      - key: CLAUDE_REASONING_MODEL
+        value: claude-sonnet-4-6
+      - key: CLAUDE_FAST_MODEL
+        value: claude-haiku-4-5-20251001
+      - key: CLAUDE_MAX_TOKENS
+        value: "4096"
+
+      # Búsqueda
+      - key: SEARCH_PROVIDERS
+        value: duckduckgo
+      - key: BRAVE_SEARCH_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_ID
         sync: false
 
+      # Auth
+      - key: JWT_SECRET
+        generateValue: true  # Render genera un secret aleatorio
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_ACCESS_TTL_MINUTES
+        value: "15"
+      - key: JWT_REFRESH_TTL_DAYS
+        value: "30"
+
+      # CORS — el dominio Vercel se setea después del primer deploy del frontend
+      - key: CORS_ORIGINS
+        sync: false  # ej: https://evidence-ai.vercel.app
+      - key: CORS_ORIGIN_REGEX
+        value: 'https://.*\.vercel\.app'
+
+      # Rate limits
+      - key: RATE_LIMIT_DEFAULT
+        value: 60/minute
+      - key: RATE_LIMIT_VERIFICATION
+        value: 10/hour
+
+      # Pipeline
+      - key: MAX_CLAIMS_PER_VERIFICATION
+        value: "15"
+      - key: MAX_SOURCES_PER_CLAIM
+        value: "10"
+      - key: MAX_INPUT_CHARS
+        value: "50000"
+      - key: VERIFICATION_TIMEOUT_SECONDS
+        value: "180"
+
+  # ─── Worker (arq) ───
   - type: worker
     name: evidence-ai-worker
     runtime: docker
     plan: free
+    region: oregon
     rootDir: apps/api
     dockerfilePath: ./Dockerfile.worker
+    dockerContext: .
+    autoDeploy: true
+
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: LOG_LEVEL
+        value: INFO
+
+      # Reutilizar las mismas connection strings que el API
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: CLAUDE_REASONING_MODEL
+        value: claude-sonnet-4-6
+      - key: CLAUDE_FAST_MODEL
+        value: claude-haiku-4-5-20251001
+      - key: SEARCH_PROVIDERS
+        value: duckduckgo
+      - key: BRAVE_SEARCH_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_ID
+        sync: false
+      - key: JWT_SECRET
+        # El worker no firma tokens pero el settings.py lo valida
+        sync: false
+      - key: MAX_SOURCES_PER_CLAIM
+        value: "10"
+      - key: VERIFICATION_TIMEOUT_SECONDS
+        value: "180"
