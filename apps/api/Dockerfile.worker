@@ -21,10 +21,10 @@ RUN uv sync --frozen --no-install-project --no-dev 2>/dev/null || uv sync --no-i
 
 FROM base AS runtime
 COPY --from=deps /app/.venv /app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH=/app/src
 
 COPY . .
-RUN uv sync --no-dev 2>/dev/null || true
 
 RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
 USER app
