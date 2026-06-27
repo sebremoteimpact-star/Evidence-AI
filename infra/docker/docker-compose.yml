@@ -1,0 +1,103 @@
+# ─────────────────────────────────────────────
+# Evidence AI — Dev local completo
+# ─────────────────────────────────────────────
+# Levanta: postgres (con pgvector) + redis + api + worker + web
+# Uso:
+#   docker compose up -d                # todo
+#   docker compose up -d postgres redis # solo datos
+# ─────────────────────────────────────────────
+
+name: evidence-ai
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: evidence-ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evidence}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambiar_en_local}
+      POSTGRES_DB: ${POSTGRES_DB:-evidence_ai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-evidence}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: evidence-ai-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    container_name: evidence-ai-api
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    env_file:
+      - ../../apps/api/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-evidence}:${POSTGRES_PASSWORD:-cambiar_en_local}@postgres:5432/${POSTGRES_DB:-evidence_ai}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../apps/api:/app
+      - api-uploads:/app/data/uploads
+
+  worker:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile.worker
+    container_name: evidence-ai-worker
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    env_file:
+      - ../../apps/api/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-evidence}:${POSTGRES_PASSWORD:-cambiar_en_local}@postgres:5432/${POSTGRES_DB:-evidence_ai}
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ../../apps/api:/app
+      - api-uploads:/app/data/uploads
+
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    container_name: evidence-ai-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file:
+      - ../../apps/web/.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres-data:
+  redis-data:
+  api-uploads:

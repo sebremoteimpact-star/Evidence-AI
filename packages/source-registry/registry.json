@@ -1,0 +1,127 @@
+{
+  "$schema": "./schema.json",
+  "version": 1,
+  "description": "Mapeo de dominios a tier de fuente. Compartido entre backend (ranking) y frontend (badges).",
+  "tiers": {
+    "1": {
+      "name": "Peer-reviewed / Académico primario",
+      "description": "Investigación científica revisada por pares con metodología pública",
+      "color": "#10b981"
+    },
+    "2": {
+      "name": "Documento oficial primario",
+      "description": "Documentos emitidos por gobiernos, cortes, organismos electorales, oficinas estadísticas nacionales, bancos centrales",
+      "color": "#3b82f6"
+    },
+    "3": {
+      "name": "Organismos internacionales",
+      "description": "Organizaciones internacionales con metodología transparente",
+      "color": "#6366f1"
+    },
+    "4": {
+      "name": "Fact-checking",
+      "description": "Organizaciones de fact-checking con metodología pública (IFCN)",
+      "color": "#8b5cf6"
+    },
+    "5": {
+      "name": "Academia / Think tanks",
+      "description": "Universidades, institutos de investigación, think tanks con financiación transparente",
+      "color": "#a855f7"
+    },
+    "6": {
+      "name": "Periodismo profesional",
+      "description": "Medios de comunicación profesionales — usar solo cuando no hay evidencia primaria",
+      "color": "#94a3b8"
+    }
+  },
+  "domains": {
+    "pubmed.ncbi.nlm.nih.gov":  { "tier": 1, "type": "academic_database" },
+    "ncbi.nlm.nih.gov":         { "tier": 1, "type": "academic_database" },
+    "scholar.google.com":       { "tier": 1, "type": "academic_index" },
+    "semanticscholar.org":      { "tier": 1, "type": "academic_index" },
+    "api.semanticscholar.org":  { "tier": 1, "type": "academic_api" },
+    "doaj.org":                 { "tier": 1, "type": "academic_index" },
+    "openalex.org":             { "tier": 1, "type": "academic_index" },
+    "api.openalex.org":         { "tier": 1, "type": "academic_api" },
+    "crossref.org":             { "tier": 1, "type": "academic_metadata" },
+    "api.crossref.org":         { "tier": 1, "type": "academic_api" },
+    "arxiv.org":                { "tier": 1, "type": "preprint", "notes": "Preprint — no peer-reviewed" },
+    "ssrn.com":                 { "tier": 1, "type": "preprint", "notes": "Preprint — no peer-reviewed" },
+    "nature.com":               { "tier": 1, "type": "journal" },
+    "science.org":              { "tier": 1, "type": "journal" },
+    "nejm.org":                 { "tier": 1, "type": "journal" },
+    "thelancet.com":            { "tier": 1, "type": "journal" },
+    "bmj.com":                  { "tier": 1, "type": "journal" },
+    "cell.com":                 { "tier": 1, "type": "journal" },
+    "plos.org":                 { "tier": 1, "type": "journal" },
+
+    "supremecourt.gov":         { "tier": 2, "type": "court" },
+    "congress.gov":             { "tier": 2, "type": "legislature" },
+    "europarl.europa.eu":       { "tier": 2, "type": "legislature" },
+    "ec.europa.eu":             { "tier": 2, "type": "government" },
+    "data.europa.eu":           { "tier": 2, "type": "open_data" },
+    "data.gov":                 { "tier": 2, "type": "open_data" },
+    "datos.gob.es":             { "tier": 2, "type": "open_data" },
+    "ine.es":                   { "tier": 2, "type": "national_statistics" },
+    "bls.gov":                  { "tier": 2, "type": "national_statistics" },
+    "census.gov":               { "tier": 2, "type": "national_statistics" },
+    "ons.gov.uk":               { "tier": 2, "type": "national_statistics" },
+    "federalreserve.gov":       { "tier": 2, "type": "central_bank" },
+    "ecb.europa.eu":            { "tier": 2, "type": "central_bank" },
+    "bde.es":                   { "tier": 2, "type": "central_bank" },
+
+    "who.int":                  { "tier": 3, "type": "international_org" },
+    "un.org":                   { "tier": 3, "type": "international_org" },
+    "data.un.org":              { "tier": 3, "type": "international_org" },
+    "oecd.org":                 { "tier": 3, "type": "international_org" },
+    "data.oecd.org":            { "tier": 3, "type": "international_org" },
+    "worldbank.org":            { "tier": 3, "type": "international_org" },
+    "data.worldbank.org":       { "tier": 3, "type": "international_org" },
+    "imf.org":                  { "tier": 3, "type": "international_org" },
+    "ilo.org":                  { "tier": 3, "type": "international_org" },
+    "icrc.org":                 { "tier": 3, "type": "international_org" },
+    "transparency.org":         { "tier": 3, "type": "international_org" },
+    "crisisgroup.org":          { "tier": 3, "type": "international_org" },
+    "ourworldindata.org":       { "tier": 3, "type": "data_platform" },
+
+    "politifact.com":           { "tier": 4, "type": "factcheck" },
+    "factcheck.org":            { "tier": 4, "type": "factcheck" },
+    "fullfact.org":             { "tier": 4, "type": "factcheck" },
+    "snopes.com":               { "tier": 4, "type": "factcheck" },
+    "maldita.es":               { "tier": 4, "type": "factcheck" },
+    "newtral.es":               { "tier": 4, "type": "factcheck" },
+    "colombiacheck.com":        { "tier": 4, "type": "factcheck" },
+    "factual.afp.com":          { "tier": 4, "type": "factcheck" },
+    "factcheck.afp.com":        { "tier": 4, "type": "factcheck" },
+    "chequeado.com":            { "tier": 4, "type": "factcheck" },
+    "verificat.cat":            { "tier": 4, "type": "factcheck" },
+
+    "mit.edu":                  { "tier": 5, "type": "university" },
+    "harvard.edu":              { "tier": 5, "type": "university" },
+    "stanford.edu":             { "tier": 5, "type": "university" },
+    "ox.ac.uk":                 { "tier": 5, "type": "university" },
+    "cam.ac.uk":                { "tier": 5, "type": "university" },
+    "pewresearch.org":          { "tier": 5, "type": "research_institute" },
+    "brookings.edu":            { "tier": 5, "type": "think_tank" },
+    "rand.org":                 { "tier": 5, "type": "think_tank" },
+
+    "reuters.com":              { "tier": 6, "type": "news_agency" },
+    "apnews.com":               { "tier": 6, "type": "news_agency" },
+    "afp.com":                  { "tier": 6, "type": "news_agency" },
+    "bbc.com":                  { "tier": 6, "type": "news" },
+    "bbc.co.uk":                { "tier": 6, "type": "news" },
+    "elpais.com":               { "tier": 6, "type": "news" },
+    "elmundo.es":               { "tier": 6, "type": "news" },
+    "lemonde.fr":               { "tier": 6, "type": "news" },
+    "nytimes.com":              { "tier": 6, "type": "news" },
+    "washingtonpost.com":       { "tier": 6, "type": "news" },
+    "theguardian.com":          { "tier": 6, "type": "news" },
+    "ft.com":                   { "tier": 6, "type": "news" },
+    "economist.com":            { "tier": 6, "type": "news" }
+  },
+  "blocked_as_primary": [
+    "facebook.com", "instagram.com", "tiktok.com", "x.com", "twitter.com",
+    "reddit.com", "youtube.com", "medium.com", "substack.com",
+    "wordpress.com", "blogspot.com", "tumblr.com"
+  ]
+}

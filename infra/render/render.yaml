@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────
+# Render.com Blueprint para Evidence AI
+# ─────────────────────────────────────────────
+# Usar: en Render → New → Blueprint → conectar este repo.
+# Render leerá este archivo y creará los servicios.
+# Postgres se aprovisiona en Supabase (free); Redis en Upstash (free).
+# Aquí solo definimos API + Worker (free tier de Render).
+# ─────────────────────────────────────────────
+
+services:
+  - type: web
+    name: evidence-ai-api
+    runtime: docker
+    plan: free
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: worker
+    name: evidence-ai-worker
+    runtime: docker
+    plan: free
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile.worker
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

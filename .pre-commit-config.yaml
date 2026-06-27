@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────
+# Pre-commit hooks
+# Instalar: pre-commit install
+# Ejecutar manual: pre-commit run --all-files
+# ─────────────────────────────────────────────
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python — ruff (lint + format)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^apps/api/
+      - id: ruff-format
+        files: ^apps/api/
+
+  # Secrets scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  # Frontend — prettier + eslint via local hooks
+  - repo: local
+    hooks:
+      - id: prettier-frontend
+        name: prettier (apps/web)
+        entry: bash -c 'cd apps/web && pnpm exec prettier --write'
+        language: system
+        files: ^apps/web/.*\.(ts|tsx|js|jsx|json|css|md)$
+        pass_filenames: true

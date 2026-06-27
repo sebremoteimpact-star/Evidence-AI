@@ -1,0 +1,143 @@
+# ─────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# uv
+.uv-cache/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# ─────────────────────────────────────────────
+# Node / Next.js
+# ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+.vercel
+next-env.d.ts
+
+# Coverage
+coverage/
+*.lcov
+
+# ─────────────────────────────────────────────
+# Variables de entorno (NUNCA commitear secretos)
+# ─────────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+!.env.example
+
+# ─────────────────────────────────────────────
+# Tipos generados automáticamente
+# ─────────────────────────────────────────────
+packages/shared-types/src/api.generated.ts
+apps/web/src/types/api.generated.ts
+
+# ─────────────────────────────────────────────
+# Bases de datos / volúmenes locales
+# ─────────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+data/
+postgres-data/
+redis-data/
+uploads/
+
+# ─────────────────────────────────────────────
+# Logs
+# ─────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─────────────────────────────────────────────
+# IDEs / editores
+# ─────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────
+.dockerignore.local
+
+# ─────────────────────────────────────────────
+# Playwright / E2E
+# ─────────────────────────────────────────────
+playwright-report/
+playwright/.cache/
+test-results/
+
+# ─────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────
+*.tmp
+*.bak
+.cache/

@@ -1,0 +1,74 @@
+name: CI Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/ci-backend.yml'
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/ci-backend.yml'
+
+jobs:
+  lint-and-test:
+    name: Lint + Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: evidence
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: evidence_ai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U evidence"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: mypy
+        run: uv run mypy src/
+
+      - name: import-linter (Clean Architecture)
+        run: uv run lint-imports
+
+      - name: pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://evidence:test@localhost:5432/evidence_ai_test
+          REDIS_URL: redis://localhost:6379/0
+          ANTHROPIC_API_KEY: dummy-key-for-tests
+          JWT_SECRET: test-secret-32-characters-minimum-len
+        run: uv run pytest -m "not slow"
