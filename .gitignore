@@ -14,8 +14,8 @@ dist/
 develop-eggs/
 downloads/
 eggs/
-lib/
-lib64/
+# NO ignoramos lib/ ni lib64/ porque matarían apps/web/src/lib/ (frontend).
+# Los lib/ de Python venv ya están cubiertos por .venv/ y venv/ abajo.
 parts/
 sdist/
 var/
