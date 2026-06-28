@@ -1,4 +1,9 @@
-"""Dependencias FastAPI — extracción del usuario autenticado del JWT."""
+"""Dependencias FastAPI — extracción del usuario autenticado del JWT.
+
+Modo invitado: si no hay token, todas las peticiones se atribuyen a un
+usuario "demo" compartido. Útil para demos y para evitar fricción de
+registro. El usuario demo se auto-crea en el lifespan del API.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +19,10 @@ from evidence_ai.config.container import Container
 from evidence_ai.infrastructure.auth.jwt_service import JwtService
 
 bearer_scheme = HTTPBearer(auto_error=False)
+
+# Usuario demo compartido — se usa cuando no hay JWT
+GUEST_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
+GUEST_USER_EMAIL = "guest@evidence-ai.local"
 
 
 def _verify_token(token: str, jwt_service: JwtService) -> UUID:
@@ -39,32 +48,32 @@ async def get_current_user_id(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
     jwt_service: Annotated[JwtService, Depends(Provide[Container.jwt_service])],
 ) -> UUID:
-    """Extrae el user_id del header Authorization: Bearer ..."""
+    """Extrae el user_id del header Authorization: Bearer ...
+    Si no hay token, devuelve el GUEST_USER_ID (modo invitado).
+    """
     if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Falta token de autenticación",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return _verify_token(credentials.credentials, jwt_service)
+        return GUEST_USER_ID
+    try:
+        return _verify_token(credentials.credentials, jwt_service)
+    except HTTPException:
+        # Token inválido → fallback a invitado (demo-friendly)
+        return GUEST_USER_ID
 
 
 @inject
 async def get_current_user_id_sse(
-    token: Annotated[str | None, Query(description="Token JWT (necesario para SSE)")] = None,
+    token: Annotated[str | None, Query(description="Token JWT (opcional)")] = None,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     jwt_service: JwtService = Depends(Provide[Container.jwt_service]),
 ) -> UUID:
-    """Variante para SSE — EventSource del navegador no soporta headers custom,
-    así que aceptamos ?token=... como fallback. El token va por HTTPS.
-    """
+    """Variante para SSE. Si no hay token, modo invitado."""
     raw = credentials.credentials if credentials else token
     if not raw:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Falta token (header Authorization o ?token=...)",
-        )
-    return _verify_token(raw, jwt_service)
+        return GUEST_USER_ID
+    try:
+        return _verify_token(raw, jwt_service)
+    except HTTPException:
+        return GUEST_USER_ID
 
 
 CurrentUserId = Annotated[UUID, Depends(get_current_user_id)]

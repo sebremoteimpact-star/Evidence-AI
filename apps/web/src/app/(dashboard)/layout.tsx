@@ -1,19 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
-import { authApi } from "@/lib/api/auth";
 
+// Modo invitado activo — sin auth guard. El backend tiene un usuario
+// "guest" compartido que recibe todas las verificaciones cuando no hay JWT.
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!authApi.isAuthenticated()) {
-      router.push("/login");
-    }
-  }, [router]);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

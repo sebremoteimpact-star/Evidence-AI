@@ -17,11 +17,8 @@ export default function LandingPage() {
           <span className="text-lg font-semibold tracking-tight">Evidence AI</span>
         </Link>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Iniciar sesión</Link>
-          </Button>
           <Button variant="gradient" size="sm" asChild>
-            <Link href="/registro">Crear cuenta gratis</Link>
+            <Link href="/verificar">Empezar a verificar</Link>
           </Button>
         </div>
       </nav>
