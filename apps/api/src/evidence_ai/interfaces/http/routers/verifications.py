@@ -56,10 +56,7 @@ router = APIRouter(prefix="/api/v1/verifications", tags=["verifications"])
 async def create_verification(
     body: CreateVerificationRequest,
     user_id: CurrentUserId,
-    use_case: Annotated[
-        CreateVerificationUseCase,
-        Depends(Provide[Container.create_verification_use_case]),
-    ],
+    use_case: CreateVerificationUseCase = Depends(Provide[Container.create_verification_use_case]),
 ) -> VerificationResponse:
     """Crea una verificación en estado `pending` y la encola al worker.
     Use el endpoint `/stream/{id}` para recibir progreso en vivo vía SSE.
@@ -83,9 +80,7 @@ async def create_verification(
 async def get_verification(
     verification_id: UUID,
     user_id: CurrentUserId,
-    uow_factory: Annotated[
-        type[SqlAlchemyUnitOfWork], Depends(Provide[Container.unit_of_work.provider])
-    ],
+    uow_factory: type[SqlAlchemyUnitOfWork] = Depends(Provide[Container.unit_of_work.provider]),
 ) -> VerificationResponse:
     uow = uow_factory()
     async with uow:
@@ -108,9 +103,7 @@ async def list_verifications(
     user_id: CurrentUserId,
     limit: int = 20,
     cursor: UUID | None = None,
-    uow_factory: Annotated[
-        type[SqlAlchemyUnitOfWork], Depends(Provide[Container.unit_of_work.provider])
-    ] = None,
+    uow_factory: type[SqlAlchemyUnitOfWork] = Depends(Provide[Container.unit_of_work.provider]),
 ) -> VerificationListResponse:
     uow = uow_factory()
     async with uow:
@@ -160,7 +153,7 @@ def _evidence_to_out(e: EvidenceModel) -> EvidenceOut:
 async def get_full_verification(
     verification_id: UUID,
     user_id: CurrentUserId,
-    session_factory: Annotated[Any, Depends(Provide[Container.session_factory])],
+    session_factory: Any = Depends(Provide[Container.session_factory]),
 ) -> FullVerificationResponse:
     """Devuelve TODO lo necesario para renderizar el reporte en una sola query.
 

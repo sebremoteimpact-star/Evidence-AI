@@ -36,11 +36,8 @@ async def health() -> HealthResponse:
 @router.get("/ready", response_model=ReadinessResponse, summary="Readiness")
 @inject
 async def ready(
-    session_factory: Annotated[
-        async_sessionmaker[AsyncSession],
-        Depends(Provide[Container.session_factory]),
-    ],
-    redis: Annotated[Redis, Depends(Provide[Container.redis])],
+    session_factory: async_sessionmaker[AsyncSession] = Depends(Provide[Container.session_factory]),
+    redis: Redis = Depends(Provide[Container.redis]),
 ) -> ReadinessResponse:
     """Readiness probe — DB y Redis responden."""
     checks: dict[str, str] = {}

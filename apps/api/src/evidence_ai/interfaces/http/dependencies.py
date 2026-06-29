@@ -45,8 +45,8 @@ def _verify_token(token: str, jwt_service: JwtService) -> UUID:
 
 @inject
 async def get_current_user_id(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-    jwt_service: Annotated[JwtService, Depends(Provide[Container.jwt_service])],
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    jwt_service: JwtService = Depends(Provide[Container.jwt_service]),
 ) -> UUID:
     """Extrae el user_id del header Authorization: Bearer ...
     Si no hay token, devuelve el GUEST_USER_ID (modo invitado).
@@ -62,7 +62,7 @@ async def get_current_user_id(
 
 @inject
 async def get_current_user_id_sse(
-    token: Annotated[str | None, Query(description="Token JWT (opcional)")] = None,
+    token: str | None = Query(default=None, description="Token JWT (opcional)"),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     jwt_service: JwtService = Depends(Provide[Container.jwt_service]),
 ) -> UUID:

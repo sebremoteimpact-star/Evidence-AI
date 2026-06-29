@@ -96,11 +96,9 @@ async def _subscribe_live(
 async def stream_verification(
     verification_id: UUID,
     user_id: CurrentUserIdSse,
-    redis: Annotated[Redis, Depends(Provide[Container.redis])],
-    session_factory: Annotated[
-        async_sessionmaker[AsyncSession], Depends(Provide[Container.session_factory])
-    ],
     since: int = Query(default=0, ge=0, description="Replay desde el N-ésimo evento"),
+    redis: Redis = Depends(Provide[Container.redis]),
+    session_factory: async_sessionmaker[AsyncSession] = Depends(Provide[Container.session_factory]),
 ):
     """Stream Server-Sent Events del progreso de una verificación.
 

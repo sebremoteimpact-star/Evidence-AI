@@ -37,10 +37,8 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 @inject
 async def register(
     body: RegisterRequest,
-    use_case: Annotated[
-        RegisterUserUseCase, Depends(Provide[Container.register_user_use_case])
-    ],
-    jwt_service: Annotated[JwtService, Depends(Provide[Container.jwt_service])],
+    use_case: RegisterUserUseCase = Depends(Provide[Container.register_user_use_case]),
+    jwt_service: JwtService = Depends(Provide[Container.jwt_service]),
 ) -> RegisterResponse:
     user = await use_case.execute(
         RegisterUserCommand(
@@ -73,10 +71,8 @@ async def register(
 @inject
 async def login(
     body: LoginRequest,
-    use_case: Annotated[
-        AuthenticateUserUseCase, Depends(Provide[Container.authenticate_user_use_case])
-    ],
-    jwt_service: Annotated[JwtService, Depends(Provide[Container.jwt_service])],
+    use_case: AuthenticateUserUseCase = Depends(Provide[Container.authenticate_user_use_case]),
+    jwt_service: JwtService = Depends(Provide[Container.jwt_service]),
 ) -> TokenResponse:
     user = await use_case.execute(
         AuthenticateUserCommand(email=body.email, password=body.password)
