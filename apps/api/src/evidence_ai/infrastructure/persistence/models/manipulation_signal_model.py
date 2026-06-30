@@ -31,10 +31,10 @@ class ManipulationSignalModel(Base):
         index=True,
     )
     signal_type: Mapped[ManipulationType] = mapped_column(
-        SAEnum(ManipulationType, name="manipulation_type"), nullable=False
+        SAEnum(ManipulationType, name="manipulation_type", values_callable=lambda x: [e.value for e in x]), nullable=False
     )
     severity: Mapped[SignalSeverity] = mapped_column(
-        SAEnum(SignalSeverity, name="signal_severity"), nullable=False
+        SAEnum(SignalSeverity, name="signal_severity", values_callable=lambda x: [e.value for e in x]), nullable=False
     )
     explanation: Mapped[str] = mapped_column(Text, nullable=False)
     evidence_passage: Mapped[str | None] = mapped_column(Text)

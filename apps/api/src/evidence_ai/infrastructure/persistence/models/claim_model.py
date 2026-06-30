@@ -36,7 +36,7 @@ class ClaimModel(Base, TimestampMixin):
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     claim_type: Mapped[ClaimType] = mapped_column(
-        SAEnum(ClaimType, name="claim_type"), nullable=False, index=True
+        SAEnum(ClaimType, name="claim_type", values_callable=lambda x: [e.value for e in x]), nullable=False, index=True
     )
     context: Mapped[str | None] = mapped_column(Text)
     keywords: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)

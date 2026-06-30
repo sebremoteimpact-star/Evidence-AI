@@ -44,7 +44,7 @@ class EvidenceModel(Base):
         comment="SHA-256 del pasaje normalizado, para dedupe",
     )
     stance: Mapped[Stance] = mapped_column(
-        SAEnum(Stance, name="stance"), nullable=False, index=True
+        SAEnum(Stance, name="stance", values_callable=lambda x: [e.value for e in x]), nullable=False, index=True
     )
     relevance_score: Mapped[float] = mapped_column(Float, nullable=False)
     embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIM))

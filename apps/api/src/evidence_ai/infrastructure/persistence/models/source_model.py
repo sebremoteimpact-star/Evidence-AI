@@ -30,7 +30,7 @@ class SourceModel(Base):
         index=True,
     )
     source_type: Mapped[SourceType] = mapped_column(
-        SAEnum(SourceType, name="source_type"),
+        SAEnum(SourceType, name="source_type", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

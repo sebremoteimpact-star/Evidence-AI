@@ -37,7 +37,7 @@ class ReportModel(Base):
     executive_conclusion: Mapped[str] = mapped_column(Text, nullable=False)
     confidence_value: Mapped[int] = mapped_column(Integer, nullable=False)
     verdict: Mapped[Verdict] = mapped_column(
-        SAEnum(Verdict, name="verdict"), nullable=False
+        SAEnum(Verdict, name="verdict", values_callable=lambda x: [e.value for e in x]), nullable=False
     )
     confidence_breakdown: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict,

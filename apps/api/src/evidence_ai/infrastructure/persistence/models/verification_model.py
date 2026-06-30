@@ -42,14 +42,14 @@ class VerificationModel(Base, TimestampMixin):
         index=True,
     )
     input_type: Mapped[InputType] = mapped_column(
-        SAEnum(InputType, name="input_type"), nullable=False
+        SAEnum(InputType, name="input_type", values_callable=lambda x: [e.value for e in x]), nullable=False
     )
     input_raw: Mapped[str] = mapped_column(Text, nullable=False)
     input_normalized: Mapped[str | None] = mapped_column(Text)
     source_url: Mapped[str | None] = mapped_column(Text)
     language: Mapped[str | None] = mapped_column(String(5))
     status: Mapped[VerificationStatus] = mapped_column(
-        SAEnum(VerificationStatus, name="verification_status"),
+        SAEnum(VerificationStatus, name="verification_status", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         default=VerificationStatus.PENDING,
         index=True,
