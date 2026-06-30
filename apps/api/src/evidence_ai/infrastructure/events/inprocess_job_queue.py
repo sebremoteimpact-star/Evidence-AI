@@ -15,6 +15,7 @@ de todas formas — la situación es equivalente.
 from __future__ import annotations
 
 import asyncio
+import inspect
 from collections.abc import Callable
 from uuid import UUID
 
@@ -36,7 +37,13 @@ class InProcessJobQueue:
         self._tasks: set[asyncio.Task] = set()
 
     async def enqueue_verification(self, verification_id: UUID) -> str:
-        use_case = self._use_case_provider()
+        # El factory puede devolver un coroutine/future cuando alguna dep es async
+        # (ej: Resource Redis). Si lo es, lo awaiteamos para obtener la instancia real.
+        result = self._use_case_provider()
+        if inspect.isawaitable(result):
+            use_case = await result
+        else:
+            use_case = result
         task = asyncio.create_task(self._safe_run(use_case, verification_id))
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)
